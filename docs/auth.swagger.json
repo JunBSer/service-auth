@@ -1,0 +1,920 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Auth Service API",
+    "version": "2.0",
+    "contact": {
+      "name": "JunBSer",
+      "url": "https://github.com/JunBSer",
+      "email": "aleksei.radzetskiiw@gmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth"
+    }
+  ],
+  "host": "localhost:8080",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/admin/users": {
+      "get": {
+        "summary": "List users (Admin)",
+        "description": "Retrieve paginated list of users",
+        "operationId": "Auth_ListUsers",
+        "responses": {
+          "200": {
+            "description": "Users list retrieved",
+            "schema": {
+              "$ref": "#/definitions/protoListUsersResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden - admin access required",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "description": "Page number",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": "1"
+          },
+          {
+            "name": "limit",
+            "description": "Items per page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": "20"
+          }
+        ],
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create new user (Admin)",
+        "description": "Create new user account with specified parameters",
+        "operationId": "Auth_CreateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoUserResponse"
+            }
+          },
+          "201": {
+            "description": "User created successfully",
+            "schema": {}
+          },
+          "403": {
+            "description": "Forbidden - admin access required",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/users/{userId}": {
+      "get": {
+        "summary": "Get user details (Admin)",
+        "description": "Retrieve detailed user information",
+        "operationId": "Auth_GetUser",
+        "responses": {
+          "200": {
+            "description": "User details retrieved",
+            "schema": {
+              "$ref": "#/definitions/protoUserResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden - admin access required",
+            "schema": {}
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "User ID to retrieve (UUID v4)",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete user (Admin)",
+        "description": "Permanently delete user account",
+        "operationId": "Auth_DeleteUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoDeleteResponse"
+            }
+          },
+          "204": {
+            "description": "User deleted successfully",
+            "schema": {}
+          },
+          "403": {
+            "description": "Forbidden - admin access required",
+            "schema": {}
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "User ID to delete (UUID v4)",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update user (Admin)",
+        "description": "Update user details and permissions",
+        "operationId": "Auth_UpdateUser",
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "schema": {
+              "$ref": "#/definitions/protoUserResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden - admin access required",
+            "schema": {}
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "User ID to update (UUID v4) - cannot be modified",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AuthUpdateUserBody"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "summary": "User login",
+        "description": "Authenticates user and returns JWT tokens",
+        "operationId": "Auth_Login",
+        "responses": {
+          "200": {
+            "description": "Success response with tokens"
+          },
+          "400": {
+            "description": "Invalid credentials",
+            "schema": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response."
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoLoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "summary": "User logout",
+        "description": "Invalidates user's authentication tokens",
+        "operationId": "Auth_Logout",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoLogoutResponse"
+            }
+          },
+          "204": {
+            "description": "Successfully logged out",
+            "schema": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoLogoutRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "summary": "Refresh tokens",
+        "description": "Generates new JWT pair using refresh token",
+        "operationId": "Auth_RefreshToken",
+        "responses": {
+          "200": {
+            "description": "New tokens generated",
+            "schema": {
+              "$ref": "#/definitions/protoRefreshResponse"
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoRefreshRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/v1/auth/register": {
+      "post": {
+        "summary": "Register new user",
+        "description": "Creates new user account",
+        "operationId": "Auth_Register",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoRegisterResponse"
+            }
+          },
+          "201": {
+            "description": "User created successfully",
+            "schema": {}
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {}
+          },
+          "409": {
+            "description": "User already exists",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoRegisterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/v1/users/me": {
+      "delete": {
+        "summary": "Delete user account",
+        "description": "Permanently delete current user's account",
+        "operationId": "Auth_DeleteAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoStatus"
+            }
+          },
+          "204": {
+            "description": "Account deleted successfully",
+            "schema": {}
+          },
+          "400": {
+            "description": "Invalid password",
+            "schema": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {}
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDeleteAccountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "User Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update user profile",
+        "description": "Updates authenticated user's name and email",
+        "operationId": "Auth_UpdateProfile",
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "schema": {
+              "$ref": "#/definitions/protoUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoUpdateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "User Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/users/me/password": {
+      "put": {
+        "summary": "Change user password",
+        "description": "Updates authenticated user's password",
+        "operationId": "Auth_ChangePassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoChangePasswordResponse"
+            }
+          },
+          "204": {
+            "description": "Password changed successfully",
+            "schema": {}
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoChangePasswordRequest"
+            }
+          }
+        ],
+        "tags": [
+          "User Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "AuthUpdateUserBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "New user name"
+        },
+        "email": {
+          "type": "string",
+          "description": "New email address"
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Admin status"
+        },
+        "password": {
+          "type": "string",
+          "format": "password",
+          "description": "Password to change"
+        }
+      }
+    },
+    "googlerpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "protoChangePasswordRequest": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "description": "JWT token to change password"
+        },
+        "oldPassword": {
+          "type": "string",
+          "format": "password",
+          "description": "Current password"
+        },
+        "newPassword": {
+          "type": "string",
+          "format": "password",
+          "description": "New password"
+        }
+      },
+      "title": "Password management"
+    },
+    "protoChangePasswordResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/protoStatus"
+        }
+      }
+    },
+    "protoCreateUserRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User's display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address"
+        },
+        "password": {
+          "type": "string",
+          "format": "password",
+          "description": "Initial password"
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Grant admin privileges"
+        }
+      },
+      "title": "Admin management messages"
+    },
+    "protoDeleteAccountRequest": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "description": "JWT token to delete"
+        },
+        "password": {
+          "type": "string",
+          "description": "User's password for confirmation"
+        }
+      }
+    },
+    "protoDeleteResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/protoStatus"
+        }
+      }
+    },
+    "protoJWTPair": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "description": "Access token for API authorization"
+        },
+        "refreshToken": {
+          "type": "string",
+          "description": "Refresh token for obtaining new access tokens"
+        }
+      }
+    },
+    "protoListUsersResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoUserResponse"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "protoLoginRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "User's email address"
+        },
+        "password": {
+          "type": "string",
+          "format": "password",
+          "description": "User's password"
+        }
+      },
+      "title": "Authentication messages"
+    },
+    "protoLoginResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "$ref": "#/definitions/protoJWTPair"
+        }
+      }
+    },
+    "protoLogoutRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string",
+          "description": "Refresh token to invalidate"
+        }
+      }
+    },
+    "protoLogoutResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/protoStatus"
+        }
+      }
+    },
+    "protoRefreshRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string",
+          "description": "Valid refresh token"
+        }
+      },
+      "title": "Token management"
+    },
+    "protoRefreshResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "$ref": "#/definitions/protoJWTPair"
+        }
+      }
+    },
+    "protoRegisterRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User's display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address"
+        },
+        "password": {
+          "type": "string",
+          "format": "password",
+          "description": "Desired password"
+        }
+      }
+    },
+    "protoRegisterResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "$ref": "#/definitions/protoUUID",
+          "description": "Created user ID (UUID v4)"
+        }
+      }
+    },
+    "protoStatus": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "protoUUID": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "UUID v4 in string format"
+        }
+      },
+      "title": "Common messages"
+    },
+    "protoUpdateProfileRequest": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "description": "JWT token to update"
+        },
+        "name": {
+          "type": "string",
+          "description": "New display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "New email address"
+        }
+      }
+    },
+    "protoUserResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "$ref": "#/definitions/protoUUID",
+          "description": "Immutable user ID (UUID v4)"
+        },
+        "name": {
+          "type": "string",
+          "description": "User's display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address"
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Admin status"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "User creation timestamp"
+        }
+      }
+    },
+    "protoValidateTokenResponse": {
+      "type": "object",
+      "properties": {
+        "isValid": {
+          "type": "boolean"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Token expiration timestamp (Unix)"
+        },
+        "userId": {
+          "$ref": "#/definitions/protoUUID",
+          "description": "User ID from the token (UUID v4)"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    }
+  },
+  "securityDefinitions": {
+    "bearerAuth": {
+      "type": "",
+      "description": "JWT Authentication. Format: 'Bearer {token}'"
+    }
+  }
+}

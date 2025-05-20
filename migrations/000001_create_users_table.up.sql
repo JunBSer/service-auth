@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS users(
+    user_id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    pass_hash CHAR(60) NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+)
