@@ -135,7 +135,7 @@ func (srv *AuthService) Login(email string, password string) (string, string, er
 	return aTkn, rTkn, nil
 }
 
-func (srv *AuthService) ValidateToken(token string, tokenType byte) (uuid.UUID, error) {
+func (srv *AuthService) ValidateToken(token string, tokenType byte) (uuid.UUID, bool, error) {
 	const op = "Auth.ValidateToken"
 
 	var userID, sessionID uuid.UUID
@@ -149,50 +149,56 @@ func (srv *AuthService) ValidateToken(token string, tokenType byte) (uuid.UUID, 
 
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred ", zap.Error(err), zap.String("caller", op))
-		return uuid.Nil, err
+		return uuid.Nil, false, err
 	}
 
 	if tokenType == JWT {
 		isBlacklisted, err := srv.blacklist.IsBlacklisted(sessionID)
 		if err != nil {
 			srv.log.Error(context.Background(), "Error occurred while checking blacklist", zap.Error(err), zap.String("caller", op))
-			return uuid.Nil, err
+			return uuid.Nil, false, err
 		}
 
 		if isBlacklisted {
 			srv.log.Error(context.Background(), "Blacklisted session", zap.String("caller", op), zap.String("sessionID", sessionID.String()))
-			return uuid.Nil, errors.New("blacklisted session")
+			return uuid.Nil, false, errors.New("blacklisted session")
 		}
 	} else {
 		isExists, err := srv.sessions.IsSessionExists(sessionID)
 		if err != nil {
 			srv.log.Error(context.Background(), "Error occurred while checking sessions", zap.Error(err), zap.String("caller", op))
-			return uuid.Nil, err
+			return uuid.Nil, false, err
 		}
 
 		if !isExists {
-			return uuid.Nil, errors.New("session not found")
+			return uuid.Nil, false, errors.New("session not found")
 		}
 
 		session, err := srv.sessions.GetSessionByID(sessionID)
 		if err != nil {
 			srv.log.Error(context.Background(), "Error occurred while getting session", zap.Error(err), zap.String("caller", op))
-			return uuid.Nil, err
+			return uuid.Nil, false, err
 		}
 
 		if session.RefreshToken != token {
 			srv.log.Error(context.Background(), "Invalid token", zap.String("caller", op), zap.String("sessionID", sessionID.String()))
-			return uuid.Nil, errors.New("invalid token")
+			return uuid.Nil, false, errors.New("invalid token")
 		}
 	}
 
-	return userID, nil
+	userInfo, err := srv.uRepo.GetUserInfo(userID)
+	if err != nil {
+		srv.log.Error(context.Background(), "Error occurred while getting user info", zap.Error(err), zap.String("caller", op))
+		return uuid.Nil, false, err
+	}
+
+	return userID, userInfo.IsAdmin, nil
 }
 
 func (srv *AuthService) RefreshToken(refreshToken string) (string, string, error) {
 	const op = "Auth.RefreshToken"
 
-	userID, err := srv.ValidateToken(refreshToken, RT)
+	userID, _, err := srv.ValidateToken(refreshToken, RT)
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred while validating token", zap.Error(err), zap.String("caller", op))
 		return "", "", err
@@ -227,7 +233,7 @@ func (srv *AuthService) RefreshToken(refreshToken string) (string, string, error
 func (srv *AuthService) DeleteAccount(accessToken string, password string) error {
 	const op = "Auth.DeleteAccount"
 
-	userID, err := srv.ValidateToken(accessToken, JWT)
+	userID, _, err := srv.ValidateToken(accessToken, JWT)
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred while validating token", zap.Error(err), zap.String("caller", op))
 		return err
@@ -256,7 +262,7 @@ func (srv *AuthService) DeleteAccount(accessToken string, password string) error
 func (srv *AuthService) UpdateProfile(accessToken string, email string, name string) (*models.UserInfo, error) {
 	const op = "Auth.UpdateProfile"
 
-	usrID, err := srv.ValidateToken(accessToken, JWT)
+	usrID, _, err := srv.ValidateToken(accessToken, JWT)
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred while validating token", zap.Error(err), zap.String("caller", op))
 		return nil, err
@@ -298,7 +304,7 @@ func (srv *AuthService) UpdateProfile(accessToken string, email string, name str
 func (srv *AuthService) ChangePassword(oldPassword string, newPassword string, accessToken string) error {
 	const op = "Auth.ChangePassword"
 
-	userID, err := srv.ValidateToken(accessToken, JWT)
+	userID, _, err := srv.ValidateToken(accessToken, JWT)
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred while validating token", zap.Error(err), zap.String("caller", op))
 		return err

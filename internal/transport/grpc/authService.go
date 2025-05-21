@@ -139,7 +139,7 @@ func (srv *Service) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequ
 }
 
 func (srv *Service) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
-	userID, err := srv.srv.ValidateToken(req.Token, service.JWT)
+	userID, isAdmin, err := srv.srv.ValidateToken(req.Token, service.JWT)
 	if err != nil {
 		return &pb.ValidateTokenResponse{
 			UserId:  &pb.UUID{Value: uuid.Nil.String()},
@@ -150,6 +150,7 @@ func (srv *Service) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequ
 	return &pb.ValidateTokenResponse{
 		UserId:  &pb.UUID{Value: userID.String()},
 		IsValid: true,
+		IsAdmin: isAdmin,
 	}, nil
 }
 func (srv *Service) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
