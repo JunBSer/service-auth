@@ -280,7 +280,10 @@
         "operationId": "Auth_Login",
         "responses": {
           "200": {
-            "description": "Success response with tokens"
+            "description": "Success response with tokens",
+            "schema": {
+              "$ref": "#/definitions/proto.LoginResponse"
+            }
           },
           "400": {
             "description": "Invalid credentials",
@@ -291,7 +294,10 @@
             "schema": {}
           },
           "default": {
-            "description": "An unexpected error response."
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
           }
         },
         "parameters": [
@@ -898,6 +904,10 @@
         "userId": {
           "$ref": "#/definitions/protoUUID",
           "description": "User ID from the token (UUID v4)"
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Represents is user admin"
         }
       }
     },
