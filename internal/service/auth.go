@@ -7,6 +7,7 @@ import (
 	"github.com/JunBSer/service-auth/internal/domain/models"
 	"github.com/JunBSer/service-auth/internal/repository/session_repository"
 	"github.com/JunBSer/service-auth/internal/repository/token_blacklist_repository"
+	"github.com/JunBSer/service-auth/internal/repository/user_cache_repository"
 	"github.com/JunBSer/service-auth/internal/repository/user_storage_repository"
 	"github.com/JunBSer/service-auth/pkg/logger"
 	"github.com/google/uuid"
@@ -17,6 +18,7 @@ type AuthService struct {
 	uRepo     user_storage_repository.UserRepository
 	sessions  session_repository.SessionRepository
 	blacklist token_blacklist_repository.BlacklistRepository
+	cacheRepo user_cache_repository.CacheRepository
 	tkn       TokenService
 	log       logger.Logger
 }
@@ -25,9 +27,10 @@ func NewAuthService(
 	uRepo user_storage_repository.UserRepository,
 	sessions session_repository.SessionRepository,
 	blacklist token_blacklist_repository.BlacklistRepository,
+	cache user_cache_repository.CacheRepository,
 	tkn TokenService,
 	log logger.Logger) *AuthService {
-	return &AuthService{uRepo, sessions, blacklist, tkn, log}
+	return &AuthService{uRepo, sessions, blacklist, cache, tkn, log}
 }
 
 // Methods that dont need auth middleware
@@ -59,7 +62,7 @@ func (srv *AuthService) CleanAllUsrSessions(userID uuid.UUID) error {
 		return err
 	}
 
-	err = srv.sessions.DeleteAllUsSessions(userID)
+	err = srv.sessions.DeleteAllUserSessions(userID)
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred while deleting sessions", zap.Error(err), zap.String("caller", op))
 		return err
@@ -273,6 +276,11 @@ func (srv *AuthService) UpdateProfile(accessToken string, email string, name str
 		Password: "",
 	})
 
+	if err := srv.cacheRepo.RemoveFromCache(usrID); err != nil {
+		srv.log.Debug(context.Background(), "Failed to invalidate cache",
+			zap.Error(err), zap.String("caller", op))
+	}
+
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred while updating user", zap.Error(err), zap.String("caller", op))
 		return nil, err
@@ -376,10 +384,20 @@ func (srv *AuthService) GetUser(userID string) (*models.UserInfo, error) {
 		return nil, err
 	}
 
+	cachedUser, err := srv.cacheRepo.Get(usrID)
+	if err == nil && cachedUser != nil {
+		return cachedUser, nil
+	}
+
 	usr, err := srv.uRepo.GetUser(usrID)
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred while getting user", zap.Error(err), zap.String("caller", op))
 		return nil, err
+	}
+
+	if err := srv.cacheRepo.AddToCache(usr.UserToInfo()); err != nil {
+		srv.log.Debug(context.Background(), "Failed to cache user",
+			zap.Error(err), zap.String("caller", op))
 	}
 
 	return &models.UserInfo{
@@ -405,6 +423,12 @@ func (srv *AuthService) DeleteUser(userID string) error {
 		srv.log.Error(context.Background(), "Error occurred while deleting user", zap.Error(err), zap.String("caller", op))
 		return err
 	}
+
+	if err := srv.cacheRepo.RemoveFromCache(usrID); err != nil {
+		srv.log.Debug(context.Background(), "Failed to invalidate cache",
+			zap.Error(err), zap.String("caller", op))
+	}
+
 	return nil
 }
 
@@ -426,6 +450,11 @@ func (srv *AuthService) UpdateUser(newInfo *models.UserChInfo) (*models.UserInfo
 	if err != nil {
 		srv.log.Error(context.Background(), "Error occurred while updating user", zap.Error(err), zap.String("caller", op))
 		return nil, err
+	}
+
+	if err := srv.cacheRepo.RemoveFromCache(newInfo.ID); err != nil {
+		srv.log.Debug(context.Background(), "Failed to invalidate cache",
+			zap.Error(err), zap.String("caller", op))
 	}
 
 	userInfo, err := srv.uRepo.GetUser(newInfo.ID)

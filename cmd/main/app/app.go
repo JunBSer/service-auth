@@ -7,5 +7,5 @@ import (
 
 func main() {
 	cfg := config.MustLoad()
-	app.Run(cfg)
+	app.MustRun(cfg)
 }

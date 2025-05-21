@@ -52,9 +52,9 @@ var (
 	ErrTokenNotValidYet = errors.New("token not active yet")
 )
 
-func NewTokenService(log logger.Logger, secret string, jwtValid, rtValid time.Duration) *TokenServ {
+func NewTokenService(log *logger.Logger, secret string, jwtValid, rtValid time.Duration) *TokenServ {
 	return &TokenServ{
-		log:               log,
+		log:               *log,
 		secret:            []byte(secret),
 		jwtValidationTime: jwtValid,
 		rtValidationTime:  rtValid,

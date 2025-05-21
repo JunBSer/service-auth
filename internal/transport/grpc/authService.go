@@ -14,7 +14,13 @@ type Service struct {
 	pb.UnimplementedAuthServer
 }
 
-func (srv Service) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func NewService(srv *service.AuthService) *Service {
+	return &Service{
+		srv: *srv,
+	}
+}
+
+func (srv *Service) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	aTkn, rTkn, err := srv.srv.Login(req.Email, req.Password)
 	if err != nil {
 		return nil, err
@@ -28,7 +34,7 @@ func (srv Service) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginRe
 	}, nil
 }
 
-func (srv Service) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (srv *Service) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	usrId, err := srv.srv.Register(req.Email, req.Password, req.Name)
 	if err != nil {
 		return nil, err
@@ -39,7 +45,7 @@ func (srv Service) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.R
 	}, nil
 }
 
-func (srv Service) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
+func (srv *Service) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
 	err := srv.srv.Logout(req.RefreshToken)
 	if err != nil {
 		return &pb.LogoutResponse{
@@ -60,7 +66,7 @@ func (srv Service) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.Logou
 	}, nil
 }
 
-func (srv Service) ChangePassword(ctx context.Context, req *pb.ChangePasswordRequest) (*pb.ChangePasswordResponse, error) {
+func (srv *Service) ChangePassword(ctx context.Context, req *pb.ChangePasswordRequest) (*pb.ChangePasswordResponse, error) {
 	err := srv.srv.ChangePassword(req.OldPassword, req.NewPassword, req.AccessToken)
 	if err != nil {
 		return &pb.ChangePasswordResponse{
@@ -80,7 +86,7 @@ func (srv Service) ChangePassword(ctx context.Context, req *pb.ChangePasswordReq
 		},
 	}, nil
 }
-func (srv Service) RefreshToken(ctx context.Context, req *pb.RefreshRequest) (*pb.RefreshResponse, error) {
+func (srv *Service) RefreshToken(ctx context.Context, req *pb.RefreshRequest) (*pb.RefreshResponse, error) {
 	aTkn, rTkn, err := srv.srv.RefreshToken(req.RefreshToken)
 	if err != nil {
 		return nil, err
@@ -94,7 +100,7 @@ func (srv Service) RefreshToken(ctx context.Context, req *pb.RefreshRequest) (*p
 	}, nil
 }
 
-func (srv Service) DeleteAccount(ctx context.Context, req *pb.DeleteAccountRequest) (*pb.Status, error) {
+func (srv *Service) DeleteAccount(ctx context.Context, req *pb.DeleteAccountRequest) (*pb.Status, error) {
 	err := srv.srv.DeleteAccount(req.AccessToken, req.Password)
 	if err != nil {
 		return &pb.Status{
@@ -111,7 +117,7 @@ func (srv Service) DeleteAccount(ctx context.Context, req *pb.DeleteAccountReque
 	}, nil
 }
 
-func (srv Service) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UserResponse, error) {
+func (srv *Service) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UserResponse, error) {
 	userInfo, err := srv.srv.UpdateProfile(req.AccessToken, req.Email, req.Name)
 	if err != nil {
 		return nil, err
@@ -132,7 +138,7 @@ func (srv Service) UpdateProfile(ctx context.Context, req *pb.UpdateProfileReque
 	}, nil
 }
 
-func (srv Service) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
+func (srv *Service) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
 	userID, err := srv.srv.ValidateToken(req.Token, service.JWT)
 	if err != nil {
 		return &pb.ValidateTokenResponse{
@@ -146,7 +152,7 @@ func (srv Service) ValidateToken(ctx context.Context, req *pb.ValidateTokenReque
 		IsValid: true,
 	}, nil
 }
-func (srv Service) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
+func (srv *Service) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
 	userInfo, err := srv.srv.CreateUser(&models.UserCrInfo{
 		IsAdmin:  req.IsAdmin,
 		Name:     req.Name,
@@ -173,7 +179,7 @@ func (srv Service) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 	}, nil
 }
 
-func (srv Service) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UserResponse, error) {
+func (srv *Service) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UserResponse, error) {
 	userInfo, err := srv.srv.GetUser(req.UserId)
 	if err != nil {
 		return nil, err
@@ -194,7 +200,7 @@ func (srv Service) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.Use
 	}, nil
 }
 
-func (srv Service) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
+func (srv *Service) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
 	users, err := srv.srv.ListUsers(int(req.Page), int(req.Limit))
 	if err != nil {
 		return nil, err
@@ -225,7 +231,7 @@ func (srv Service) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb
 	}, nil
 }
 
-func (srv Service) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
+func (srv *Service) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
 	userInfo, err := srv.srv.UpdateUser(&models.UserChInfo{
 		IsAdmin:  req.IsAdmin,
 		Name:     req.Name,
@@ -252,7 +258,7 @@ func (srv Service) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*
 	}, nil
 }
 
-func (srv Service) DeleteUser(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteResponse, error) {
+func (srv *Service) DeleteUser(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteResponse, error) {
 	err := srv.srv.DeleteUser(req.UserId)
 	if err != nil {
 		return &pb.DeleteResponse{

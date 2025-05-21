@@ -22,7 +22,7 @@ type SessionRepository interface {
 	DeleteEarliestSession(usrID uuid.UUID) error
 	IsSessionExists(sessionID uuid.UUID) (bool, error)
 	GetAllUserSessions(usrID uuid.UUID) ([]models.SessionReg, error)
-	DeleteAllUsSessions(usrID uuid.UUID) error
+	DeleteAllUserSessions(usrID uuid.UUID) error
 	GetSessionByID(sessionID uuid.UUID) (*models.SessionReg, error)
 	RefreshSessionToken(refreshToken string, sessionID uuid.UUID) error
 }
@@ -38,10 +38,10 @@ var (
 	ErrorNotFound = fmt.Errorf("session not found")
 )
 
-func NewSessionsRepo(db *postgres.DB, log logger.Logger, sessDuration time.Duration, maxSessionCnt int) *SessionsRepo {
+func NewSessionsRepo(db *postgres.DB, log *logger.Logger, sessDuration time.Duration, maxSessionCnt int) *SessionsRepo {
 	return &SessionsRepo{
 		DB:              db,
-		log:             log,
+		log:             *log,
 		SessionDuration: sessDuration,
 		MaxSessionCnt:   maxSessionCnt,
 	}

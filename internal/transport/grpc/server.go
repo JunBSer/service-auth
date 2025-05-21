@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/JunBSer/service-auth/pkg/logger"
+	pb "github.com/JunBSer/services_proto/gen/go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
@@ -20,7 +21,7 @@ type Server struct {
 	lg       *logger.Logger
 }
 
-func New(cfg Config, log logger.Logger) (*Server, error) {
+func New(cfg Config, log logger.Logger, service *Service) (*Server, error) {
 	ctx := context.Background()
 
 	log.Info(ctx, "Creating gRPC server...")
@@ -36,6 +37,8 @@ func New(cfg Config, log logger.Logger) (*Server, error) {
 	grpcServer := grpc.NewServer(opts...)
 
 	log.Info(ctx, "Created gRPC server", zap.String("host: ", cfg.Host), zap.String("port: ", cfg.Port))
+
+	pb.RegisterAuthServer(grpcServer, service)
 
 	return &Server{grpc: grpcServer, listener: lis, lg: &log}, nil
 }
@@ -54,10 +57,3 @@ func (srv *Server) Stop() {
 }
 
 //Use it in grace shut
-//if err != nil {
-//	if errors.Is(err, grpc.ErrServerStopped) {
-//		(*srv.lg).Info(context.Background(), "gRpc server stopped", zap.Error(err))
-//	} else {
-//		(*srv.lg).Info(context.Background(), "Error to start gRPC server", zap.Error(err))
-//	}
-//}

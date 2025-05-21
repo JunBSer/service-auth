@@ -1,9 +1,12 @@
 package models
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"time"
 )
+
+var ErrCacheMiss = errors.New("cache miss")
 
 // User represents db row
 type User struct {
@@ -17,11 +20,11 @@ type User struct {
 
 // UserRes  uses for grpc response contract
 type UserInfo struct {
-	ID        uuid.UUID
-	Name      string
-	Email     string
-	IsAdmin   bool
-	CreatedAt time.Time
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	IsAdmin   bool      `json:"is_admin"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type UserChInfo struct {

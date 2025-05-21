@@ -2,21 +2,47 @@ package config
 
 import (
 	"flag"
+	"github.com/JunBSer/service-auth/internal/transport/grpc"
 	"github.com/JunBSer/service-auth/pkg/db/postgres"
+	"github.com/JunBSer/service-auth/pkg/db/redis"
 	"github.com/ilyakaznacheev/cleanenv"
 	"os"
+	"time"
 )
 
 type (
 	Config struct {
-		DB     postgres.PGConfig
-		App    App
-		Logger Log
+		DB      postgres.PGConfig
+		App     App
+		Logger  Log
+		Redis   redis.Config
+		Token   TokenConfig
+		Session SessionConfig
+		Admin   AdminConfig
+		GRPC    grpc.Config
+	}
+
+	TokenConfig struct {
+		AccessTokenExpireTime  time.Duration `env:"ACCESS_TOKEN_EXPIRE"`
+		RefreshTokenExpireTime time.Duration `env:"REFRESH_TOKEN_EXPIRE"`
+	}
+
+	SessionConfig struct {
+		MaxLifetime   time.Duration `env:"SESSION_DURATION"`
+		MaxSessionCnt int           `env:"MAX_SESSION_CNT"`
 	}
 
 	App struct {
-		ServiceName string `env:"SERVICE_NAME" envDefault:"Unnamed_Service"`
-		Version     string `env:"VERSION" envDefault:"1.0.0"`
+		ServiceName string        `env:"SERVICE_NAME" envDefault:"Unnamed_Service"`
+		Version     string        `env:"VERSION" envDefault:"1.0.0"`
+		Secret      string        `env:"SECRET_KEY"`
+		CacheExpire time.Duration `env:"CACHE_EXPIRE"`
+	}
+
+	AdminConfig struct {
+		AdminName   string `env:"ADMIN_NAME"`
+		AdminEmail  string `env:"ADMIN_EMAIL"`
+		AdminPasswd string `env:"ADMIN_PASSWORD"`
 	}
 
 	Log struct {
