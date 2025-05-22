@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 	"github.com/JunBSer/service-auth/internal/domain/models"
 	"github.com/JunBSer/service-auth/internal/service"
 	pb "github.com/JunBSer/services_proto/gen/go"
@@ -233,7 +234,13 @@ func (srv *Service) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*p
 }
 
 func (srv *Service) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
+	userID, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID %s", req.UserId)
+	}
+
 	userInfo, err := srv.srv.UpdateUser(&models.UserChInfo{
+		ID:       userID,
 		IsAdmin:  req.IsAdmin,
 		Name:     req.Name,
 		Email:    req.Email,

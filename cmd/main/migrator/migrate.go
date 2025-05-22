@@ -49,10 +49,10 @@ func main() {
 	var dbCfg DbConfig
 	var adminCfg AdminConfig
 
-	if err := cleanenv.ReadEnv(&dbCfg); err != nil {
+	if err := cleanenv.ReadConfig(configPath, &dbCfg); err != nil {
 		log.Fatalf("Error reading db config: %v", err)
 	}
-	if err := cleanenv.ReadEnv(&adminCfg); err != nil {
+	if err := cleanenv.ReadConfig(configPath, &adminCfg); err != nil {
 		log.Fatalf("Error reading admin config: %v", err)
 	}
 
@@ -89,7 +89,7 @@ func main() {
 	}
 
 	query := `
-		INSERT INTO users (id, name, email, pass_hash, is_admin, created_at)
+		INSERT INTO users (user_id, name, email, pass_hash, is_admin, created_at)
 		VALUES ($1, $2, $3, $4, TRUE, NOW())
 		ON CONFLICT (email) DO NOTHING;
 	`

@@ -9,6 +9,7 @@ import (
 	"github.com/JunBSer/service-auth/pkg/db/postgres"
 	"github.com/JunBSer/service-auth/pkg/logger"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"time"
@@ -119,7 +120,15 @@ func (repo *UserRepo) CreateUser(user *models.UserCrInfo) (uuid.UUID, error) {
 
 	err = repo.AddUser(newUser)
 	if err != nil {
-		repo.log.Error(context.Background(), "Error while adding user", zap.Error(err), zap.String("caller", op))
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				repo.log.Error(context.Background(), "Email already exists", zap.Error(err))
+				return uuid.Nil, errors.New("email already exists")
+			}
+		}
+
+		repo.log.Error(context.Background(), "Error while filling user data", zap.Error(err))
 		return uuid.Nil, err
 	}
 
@@ -144,13 +153,20 @@ func (repo *UserRepo) Register(reg *models.UserReg) (uuid.UUID, error) {
 	})
 
 	if err != nil {
-		repo.log.Error(context.Background(), "Error while filling user data", zap.Error(err), zap.String("caller", op))
+		repo.log.Error(context.Background(), "Error while filling user data", zap.Error(err))
 		return uuid.Nil, err
 	}
 
 	err = repo.AddUser(newUser)
 	if err != nil {
 		repo.log.Error(context.Background(), "Error while adding user", zap.Error(err), zap.String("caller", op))
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				repo.log.Error(context.Background(), "Email already exists", zap.Error(err))
+				return uuid.Nil, errors.New("email already exists")
+			}
+		}
 		return uuid.Nil, err
 	}
 
