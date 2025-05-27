@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS sessions
 
     FOREIGN KEY (user_id)
         REFERENCES users(user_id)
-        ON DELETE SET DEFAULT
+        ON DELETE CASCADE
 );
 

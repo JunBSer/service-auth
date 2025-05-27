@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/JunBSer/service-auth/pkg/logger"
-	pb "github.com/JunBSer/services_proto/gen/go"
+	pb "github.com/JunBSer/services_proto/auth/gen/go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"

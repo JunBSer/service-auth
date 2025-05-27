@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-auth
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1111
+      POSTGRES_DB: auth
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    command: postgres -c ssl=off
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    environment:
+      REDIS_PASSWORD: 1111
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+    command: redis-server --requirepass 1111
+
+volumes:
+  postgres-auth-data:
+  redis-data:
+
+networks:
+  app-network:
+    driver: bridge

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/JunBSer/service-auth/internal/domain/models"
 	"github.com/JunBSer/service-auth/internal/service"
-	pb "github.com/JunBSer/services_proto/gen/go"
+	pb "github.com/JunBSer/services_proto/auth/gen/go"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
